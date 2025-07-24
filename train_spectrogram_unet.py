@@ -1,4 +1,5 @@
 import argparse
+import importlib
 from pathlib import Path
 
 import numpy as np
@@ -9,9 +10,16 @@ from torch.utils.data.dataset import Dataset
 from torch.cuda.amp import GradScaler, autocast
 from tqdm import tqdm
 
-from dataset.data_laoding import DenoiseDataset  # note the existing typo in file name
+from dataset.data_laoding import DenoiseDataset  
 from models.spectrogram_unet import SpectrogramUNet
 from utils.metrics import si_sdr, psnr
+
+# optional wandb import (only if used)
+wandb_spec = importlib.util.find_spec("wandb")
+if wandb_spec is not None:
+    import wandb
+else:
+    wandb = None  # type: ignore
 
 
 class RandomCropWrapper(Dataset):
@@ -42,9 +50,23 @@ class RandomCropWrapper(Dataset):
         return torch.from_numpy(noisy).float(), torch.from_numpy(clean).float()
 
 
-def get_dataloaders(root: str, crop_samples: int, batch_size: int, num_workers: int = 4):
-    train_ds = RandomCropWrapper(DenoiseDataset(root, "train"), crop_samples)
-    val_ds = RandomCropWrapper(DenoiseDataset(root, "val"), crop_samples)
+def get_dataloaders(root: str, crop_samples: int, batch_size: int, num_workers: int = 4, subset: int | None = None):
+    """Return train/val DataLoaders.
+
+    When *subset* is not None, restrict both splits to the first *subset* items (useful for quick debugging).
+    """
+    train_base = DenoiseDataset(root, "train")
+    val_base = DenoiseDataset(root, "val")
+    if subset is not None:
+        indices_train = list(range(min(len(train_base), subset)))
+        indices_val = list(range(min(len(val_base), subset)))
+        from torch.utils.data import Subset
+
+        train_base = Subset(train_base, indices_train)
+        val_base = Subset(val_base, indices_val)
+
+    train_ds = RandomCropWrapper(train_base, crop_samples)
+    val_ds = RandomCropWrapper(val_base, crop_samples)
     train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=True, drop_last=True, num_workers=num_workers)
     val_loader = DataLoader(val_ds, batch_size=batch_size, shuffle=False, drop_last=False, num_workers=num_workers)
     return train_loader, val_loader
@@ -60,10 +82,10 @@ def istft(stft_tensor: torch.Tensor, length: int, n_fft: int = 1024, hop: int = 
     return torch.istft(stft_tensor, n_fft=n_fft, hop_length=hop, window=window, length=length)
 
 
-def train_epoch(model, loader, optimizer, scaler, device):
+def train_epoch(model, loader, optimizer, scaler, device, max_batches: int | None = None):
     model.train()
     total_loss = 0.0
-    for noisy, clean in tqdm(loader, desc="train", leave=False):
+    for b_idx, (noisy, clean) in enumerate(tqdm(loader, desc="train", leave=False)):
         noisy = noisy.to(device)
         clean = clean.to(device)
         optimizer.zero_grad()
@@ -81,15 +103,19 @@ def train_epoch(model, loader, optimizer, scaler, device):
         scaler.step(optimizer)
         scaler.update()
         total_loss += loss.item() * noisy.size(0)
-    return total_loss / len(loader.dataset)
+        if max_batches is not None and (b_idx + 1) >= max_batches:
+            break
+    # prevent division by zero when subset ends early
+    denom = min(len(loader.dataset), (max_batches or len(loader)) * loader.batch_size)
+    return total_loss / denom
 
 
-def validate(model, loader, device):
+def validate(model, loader, device, max_batches: int | None = None):
     model.eval()
     loss_acc = 0.0
     si_sdr_acc = 0.0
     with torch.no_grad():
-        for noisy, clean in tqdm(loader, desc="val", leave=False):
+        for b_idx, (noisy, clean) in enumerate(tqdm(loader, desc="val", leave=False)):
             noisy = noisy.to(device)
             clean = clean.to(device)
             stft_noi = stft_noisy(noisy)
@@ -101,9 +127,12 @@ def validate(model, loader, device):
             mag_clean = torch.abs(stft_noisy(clean))
             l1_spec = F.l1_loss(mask * mag_noi, mag_clean)
             loss = 0.7 * l1_spec + 0.3 * l1_time
+            # note: we don't compute PSNR during training loop to save time
             loss_acc += loss.item() * noisy.size(0)
             si_sdr_acc += si_sdr(est_audio, clean).item() * noisy.size(0)
-    N = len(loader.dataset)
+            if max_batches is not None and (b_idx + 1) >= max_batches:
+                break
+    N = min(len(loader.dataset), (max_batches or len(loader)) * loader.batch_size)
     return loss_acc / N, si_sdr_acc / N
 
 
@@ -116,6 +145,13 @@ def main():
     p.add_argument("--crop", type=int, default=44100, help="segment length in samples")
     p.add_argument("--save_dir", default="checkpoints", help="where to save models")
     p.add_argument("--workers", type=int, default=4)
+    # Debug/quick-run arguments
+    p.add_argument("--subset", type=int, default=None, help="Use only the first N items of each split for quick testing")
+    p.add_argument("--max_batches", type=int, default=None, help="Limit number of batches per epoch (train/val)")
+    # wandb options
+    p.add_argument("--wandb", action="store_true", help="Log training to Weights & Biases")
+    p.add_argument("--wandb_project", default="audio-denoising", help="wandb project name")
+    p.add_argument("--wandb_entity", default=None, help="wandb entity (user or team)")
     args = p.parse_args()
 
     Path(args.save_dir).mkdir(parents=True, exist_ok=True)
@@ -127,20 +163,31 @@ def main():
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optim, T_max=args.epochs)
     scaler = GradScaler()
 
-    train_loader, val_loader = get_dataloaders(args.dataset, args.crop, args.batch, args.workers)
+    # initialise wandb if requested and available
+    if args.wandb:
+        if wandb is None:
+            raise ImportError("wandb flag is set but wandb is not installed. pip install wandb.")
+        run = wandb.init(project=args.wandb_project, entity=args.wandb_entity, config=vars(args))
+        wandb.watch(model, log="all", log_freq=100)
+
+    train_loader, val_loader = get_dataloaders(args.dataset, args.crop, args.batch, args.workers, subset=args.subset)
 
     best_sdr = -np.inf
     for epoch in range(1, args.epochs + 1):
-        train_loss = train_epoch(model, train_loader, optim, scaler, device)
-        val_loss, val_sdr = validate(model, val_loader, device)
+        train_loss = train_epoch(model, train_loader, optim, scaler, device, max_batches=args.max_batches)
+        val_loss, val_sdr = validate(model, val_loader, device, max_batches=args.max_batches)
         scheduler.step()
         print(f"Epoch {epoch:03d}: train_loss={train_loss:.4f} | val_loss={val_loss:.4f} | val_si_sdr={val_sdr:.2f} dB")
+        if args.wandb:
+            wandb.log({"epoch": epoch, "train_loss": train_loss, "val_loss": val_loss, "val_si_sdr": val_sdr})
         ckpt_path = Path(args.save_dir) / f"epoch{epoch:03d}.pt"
         torch.save({"model": model.state_dict(), "opt": optim.state_dict(), "epoch": epoch}, ckpt_path)
         if val_sdr > best_sdr:
             best_sdr = val_sdr
             torch.save(model.state_dict(), Path(args.save_dir) / "best.pt")
-            print(f"  → New best model (SI-SDR={best_sdr:.2f} dB) saved.")
+            print(f"   New best model (SI-SDR={best_sdr:.2f} dB) saved.")
+            if args.wandb:
+                wandb.run.summary["best_si_sdr"] = best_sdr
 
 
 if __name__ == "__main__":

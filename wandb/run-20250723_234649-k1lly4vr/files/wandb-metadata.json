@@ -1,0 +1,55 @@
+{
+  "os": "macOS-15.5-arm64-arm-64bit",
+  "python": "CPython 3.12.2",
+  "startedAt": "2025-07-24T06:46:49.118595Z",
+  "args": [
+    "--subset",
+    "32",
+    "--max_batches",
+    "5",
+    "--epochs",
+    "2",
+    "--wandb",
+    "--wandb_project",
+    "audio-denoise-demo"
+  ],
+  "program": "/Users/lauragomez/Desktop/audio-denoising/train_spectrogram_unet.py",
+  "codePath": "train_spectrogram_unet.py",
+  "git": {
+    "remote": "https://github.com/LauraGomezjurado/audio-denoising.git",
+    "commit": "c37f931e5fd304bc7a109d52ab65d20af035250f"
+  },
+  "email": "laura.gomezjurado1@gmail.com",
+  "root": "/Users/lauragomez/Desktop/audio-denoising",
+  "host": "Lauras-MacBook-Pro-4.local",
+  "executable": "/Users/lauragomez/miniconda3/bin/python",
+  "codePathLocal": "train_spectrogram_unet.py",
+  "cpu_count": 12,
+  "cpu_count_logical": 12,
+  "disk": {
+    "/": {
+      "total": "994662584320",
+      "used": "482326671360"
+    },
+    "/System/Volumes/Data": {
+      "total": "994662584320",
+      "used": "482326671360"
+    }
+  },
+  "memory": {
+    "total": "17179869184"
+  },
+  "cpu": {
+    "count": 12,
+    "countLogical": 12
+  },
+  "apple": {
+    "name": "Apple M2 Pro",
+    "ecpuCores": 4,
+    "pcpuCores": 8,
+    "gpuCores": 19,
+    "memoryGb": 16,
+    "swapTotalBytes": "4294967296",
+    "ramTotalBytes": "17179869184"
+  }
+}
