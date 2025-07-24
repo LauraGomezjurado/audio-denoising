@@ -1,0 +1,52 @@
+# --- General Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Virtual environments
+venv/
+env/
+*.venv/
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# pytest & coverage
+.pytest_cache/
+coverage.xml
+*.coverage
+htmlcov/
+
+# MyPy & other caches
+.mypy_cache/
+.cache/
+
+# Logs
+*.log
+
+# IDE / Editor settings
+.vscode/
+.idea/
+
+# macOS & Windows noise
+.DS_Store
+Thumbs.db
+
+# --- Project-specific (audio data) ---
+# Raw Philharmonia library and generated datasets are large; keep code & metadata only.
+audio/
+noise.wav
+# Per-SNR temporary outputs
+dataset_snr*/
+# Final dataset keeps .csv + README, but ignore heavy .wav files
+# (we keep metadata, so DO NOT ignore dataset/**.csv or dataset/**README*)
+dataset/**/*.wav
+
+# --- Git LFS note ---
+# If you plan to version some audio or model weights, consider Git LFS instead of removing patterns above. 
