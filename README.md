@@ -29,9 +29,9 @@ This repo trains a **U-Net that predicts a soft mask over magnitude spectrograms
 
 Each example contains:
 
-1. Clean speech excerpt (from <a href="https://commonvoice.mozilla.org">Common Voice</a>)
+1. Clean speech excerpt (from <a href="https://drive.google.com/drive/folders/1u_-hzRJ7_BKvrrpwh4wH9J4q9AcB0Uey?usp=sharing">Neo Scholars Take Home Google Drive</a>)
 2. Synthetic 60 Hz + harmonics + random phase + slowly-varying amplitude
-3. Weighted mix at SNR ∈ {5, 10, 15, 20} dB
+3. Weighted mix at SNR ∈ {0, 5, 10, 15} dB
 
 Scripts live in `dataset/`:
 ```bash
@@ -43,7 +43,7 @@ python dataset/build_dataset.py --root dataset
 
 ##  Model architecture
 
-Spectrogram U-Net (Ronneberger et al.) operating on STFT magnitudes (513 bins):
+Spectrogram U-Net (<a href="https://arxiv.org/abs/1810.11520">Oh, J., Kim, D., & Yun, S.-Y. (2018)</a>) operating on STFT magnitudes (513 bins):
 ````text
                             +------+               +------+
        │ mag │              | up 4 |<--skip--+-----| out  |
@@ -79,7 +79,7 @@ unet (best.pt),test,26.30,62.79
 * +18.8 dB SI-SDR over raw noisy input ⇒ **~75× noise power reduction**
 * Fixed notch filter barely helps because speech energy also sits at 60 Hz and harmonics.
 
-Generate CSV & figures yourself:
+Generate CSV & figures:
 ```bash
 python scripts/evaluate_models.py \
   --dataset dataset --split test --checkpoint checkpoints/best.pt \
