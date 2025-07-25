@@ -40,6 +40,8 @@ A U-Net that predicts a soft mask \([0,1]\) over magnitude spectrograms.
 
 ![U-Net architecture](scripts/u-net.jpg)
 
+*Figure: Overview of the U-Net architecture (taken from [GeeksforGeeks](https://www.geeksforgeeks.org/machine-learning/u-net-architecture-explained/)).*
+
 Why U-Net? Multi-scale context is essential for hum plus harmonics; mask-based estimation preserves noisy phase and is data-efficient.
 
 ---
