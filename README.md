@@ -129,7 +129,6 @@ Then open <http://127.0.0.1:7860> and drag-&-drop a WAV.
 
 1. Set random seeds in `train_spectrogram_unet.py` (disabled by default).
 2. All checkpoints, CSVs and figures are version-controlled – see `checkpoints/best.pt`.
-3. Dockerfile coming soon.
 
 ## References
 
