@@ -6,7 +6,7 @@
 
 ##   Project overview
 
-This repo trains a **U-Net that predicts a soft mask over magnitude spectrograms** and removes the hum while keeping speech intact.
+This repo trains a **U-Net that predicts a soft mask over magnitude spectrograms** and removes the hum while preserving the insturment sound
 
 *   Input: single-channel 16 kHz WAV
 *   Output: denoised WAV (same length)
