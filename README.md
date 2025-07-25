@@ -1,6 +1,6 @@
 # Audio Denoising – 60 Hz Hum-Removal
 
-> code, results and an interactive demo for **Spectrogram U-Net** that suppresses mains hum in speech recordings.
+> code, results and an interactive demo for **Spectrogram U-Net** that suppresses mains hum in music recordings.
 
 ---
 
@@ -29,13 +29,13 @@ This repo trains a **U-Net that predicts a soft mask over magnitude spectrograms
 
 Each example contains:
 
-1. Clean speech excerpt (from <a href="https://drive.google.com/drive/folders/1u_-hzRJ7_BKvrrpwh4wH9J4q9AcB0Uey?usp=sharing">Neo Scholars Take Home Google Drive</a>)
+1. Clean music excerpts (from <a href="https://drive.google.com/drive/folders/1u_-hzRJ7_BKvrrpwh4wH9J4q9AcB0Uey?usp=sharing">Neo Scholars Take Home Google Drive</a>)
 2. Synthetic 60 Hz + harmonics + random phase + slowly-varying amplitude
 3. Weighted mix at SNR ∈ {0, 5, 10, 15} dB
 
 Scripts live in `dataset/`:
 ```bash
-# Download speech, synthesise hum, build CSV metadata
+# Download music, synthesise hum, build CSV metadata
 python dataset/build_dataset.py --root dataset
 ```
 
@@ -81,7 +81,7 @@ unet (best.pt),test,26.30,62.79
 ````
 
 * +18.8 dB SI-SDR over raw noisy input ⇒ **~75× noise power reduction**
-* Fixed notch filter barely helps because speech energy also sits at 60 Hz and harmonics.
+* Fixed notch filter barely helps because music energy also sits at 60 Hz and harmonics.
 
 Generate CSV & figures:
 ```bash
