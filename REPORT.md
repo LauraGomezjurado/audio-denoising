@@ -1,6 +1,6 @@
 # Audio-Denoising Project ‑ Technical Report
 
-## 1&nbsp;&nbsp;Problem Statement
+## &nbsp;&nbsp;Problem Statement
 Single-channel audio denoising with special focus on removing 50 / 60 Hz mains hum and its harmonics.
 
 * **Input**: noisy waveform (`.wav`, 44 100 Hz).
@@ -8,8 +8,8 @@ Single-channel audio denoising with special focus on removing 50 / 60 Hz mains h
 
 ---
 
-## 2&nbsp;&nbsp;Dataset & Pre-processing
-### 2.1 Corpus Construction (`dataset/build_dataset.py`)
+## &nbsp;&nbsp;Dataset & Pre-processing
+###  Corpus Construction (`dataset/build_dataset.py`)
 * Recursively scans `--clean-dir` for clean `.wav` files.
 * Loads a long noise recording `--noise-file` and mixes it into each clean clip at a randomly chosen SNR from `[0, 5, 10, 15] dB` (default).
 * Scaling factor (see `mix_audio`):
@@ -18,7 +18,7 @@ Single-channel audio denoising with special focus on removing 50 / 60 Hz mains h
   * `dataset/{train,val,test}/{clean|noisy}/*.wav`
   * Metadata CSV `{split}_metadata.csv` containing `noisy_path,clean_path,snr_db`.
 
-### 2.2 Training-time Augmentation (`RandomCropWrapper`)
+###  Training-time Augmentation (`RandomCropWrapper`)
 * Random 1-second (44 100-sample) crops.
 * Zero-pad if clip is shorter.
 * Peak normalise to \([-1,1]\).
@@ -26,7 +26,7 @@ Single-channel audio denoising with special focus on removing 50 / 60 Hz mains h
 
 ---
 
-## 3&nbsp;&nbsp;Model Architecture (`models/spectrogram_unet.py`)
+## &nbsp;&nbsp;Model Architecture (`models/spectrogram_unet.py`)
 A U-Net that predicts a soft mask \([0,1]\) over magnitude spectrograms.
 
 | Component  | Details |
@@ -43,7 +43,7 @@ Why U-Net? Multi-scale context is essential for hum plus harmonics; mask-based e
 
 ---
 
-## 4&nbsp;&nbsp;Signal Representation
+## &nbsp;&nbsp;Signal Representation
 * STFT parameters (hard-coded): `n_fft=1024`, `hop=256`, Hann window.
 * 75 % overlap → ~23 ms window length.
 
@@ -73,7 +73,7 @@ Check-pointing each epoch plus `best.pt` (by SI-SDR).
 
 ---
 
-## 7&nbsp;&nbsp;Evaluation Protocol
+## &nbsp;&nbsp;Evaluation Protocol
 Implemented in `evaluate.py`.
 
 | Metric | File | Notes |
@@ -89,7 +89,7 @@ Baselines available via `scripts/evaluate_models.py`:
 
 ---
 
-## 8&nbsp;&nbsp;Experimental Commands
+## &nbsp;&nbsp;Experimental Commands
 ```bash
 # Train
 python train_spectrogram_unet.py \
@@ -105,7 +105,7 @@ python evaluate.py --dataset dataset --split test \
 
 ---
 
-## 9&nbsp;&nbsp;Results & Visualisation
+## &nbsp;&nbsp;Results & Visualisation
 Run:
 ```bash
 python scripts/evaluate_models.py \
@@ -128,6 +128,10 @@ Generates bar charts (SI-SDR & PSNR) in `results/figures/`.
 
 ---
 
-## 11&nbsp;&nbsp;Nice Fast Next Step
+## &nbsp;&nbsp;Nice Fast Next Step
 * Model pruning / ONNX export for real-time inference (<20 ms latency).
+
+## References
+
+* Oh, J., Kim, D., & Yun, S.-Y. (2018). *Spectrogram-channels U-Net: A source separation model viewing each channel as the spectrogram of each source*. arXiv preprint [arXiv:1810.11520](https://arxiv.org/abs/1810.11520).
 
