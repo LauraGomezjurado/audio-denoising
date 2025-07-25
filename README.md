@@ -1,6 +1,6 @@
 # Audio Denoising – 60 Hz Hum-Removal
 
-> Publication-ready code, results and an interactive demo for **Spectrogram U-Net** that suppresses mains hum in speech recordings.
+> code, results and an interactive demo for **Spectrogram U-Net** that suppresses mains hum in speech recordings.
 
 ---
 
