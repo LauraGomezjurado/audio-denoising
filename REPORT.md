@@ -12,10 +12,7 @@ Single-channel audio denoising with special focus on removing 50 / 60 Hz mains h
 ###  Corpus Construction (`dataset/build_dataset.py`)
 * Recursively scans `--clean-dir` for clean `.wav` files.
 * Loads a long noise recording `--noise-file` and mixes it into each clean clip at a randomly chosen SNR from `[0, 5, 10, 15] dB` (default).
-* Scaling factor (see `mix_audio`):
-  $$
-  \text{scale}= \sqrt{\frac{P_{\text{clean}}}{10^{\text{SNR}/10}\,P_{\text{noise}}}}
-  $$
+* Scaling factor (see `mix_audio`): $\displaystyle \text{scale}= \sqrt{\frac{P_{\text{clean}}}{10^{\text{SNR}/10}\,P_{\text{noise}}}}$
 * Outputs:
   * `dataset/{train,val,test}/{clean|noisy}/*.wav`
   * Metadata CSV `{split}_metadata.csv` containing `noisy_path,clean_path,snr_db`.
@@ -55,8 +52,10 @@ Why U-Net? Multi-scale context is essential for hum plus harmonics; mask-based e
 Total loss (see training script):
 
 $$
-\mathcal{L}=0.7\,\underbrace{\lVert M\odot|\text{STFT}(x_{n})|-|\text{STFT}(x_{c})| \rVert_{1}}_{\text{Spectrum L1}} \\
-\quad+0.3\,\underbrace{\lVert \text{ISTFT}(M\odot\text{STFT}(x_{n}))-x_{c}\rVert_{1}}_{\text{Waveform L1}}
+\begin{aligned}
+\mathcal{L} &= 0.7\,\underbrace{\left\lVert M\odot|\text{STFT}(x_{n})|-|\text{STFT}(x_{c})| \right\rVert_{1}}_{\text{Spectrum L1}} \\
+&\quad+ 0.3\,\underbrace{\left\lVert \text{ISTFT}(M\odot\text{STFT}(x_{n}))-x_{c}\right\rVert_{1}}_{\text{Waveform L1}}
+\end{aligned}
 $$
 
 *Emphasis on spectral accuracy while still guiding waveform-level coherence.*
@@ -135,11 +134,11 @@ The algorithm operates entirely in the STFT domain and follows these steps:
 2. **Magnitude extraction & normalisation** – I feed the magnitude  |Y| (shape = `(1,1,F,T)`) to the neural network; the phase is kept untouched for later reuse.
 3. **Spectrogram U-Net inference** – the model outputs a soft mask  $\hat M\in[0,1]^{F\times T}$ that estimates, for every TF-bin, the ratio of clean energy to noisy energy.
 
-4. **Mask application** – we compute the denoised spectrogram $\hat{S}=\hat{M}\odot Y$ by element-wise multiplication with the complex noisy STFT.
+4. **Mask application** –  compute the denoised spectrogram $\hat{S}=\hat{M}\odot Y$ by element-wise multiplication with the complex noisy STFT.
 
 5. **Inverse STFT** – using the original phase and overlap–add synthesis, we obtain the time-domain waveform.
 
-6. **Peak normalisation** – finally, we scale the signal to avoid clipping.
+6. **Peak normalisation** – finally, scale the signal to avoid clipping.
 
 The figure highlights how harmonic interference (vertical stripes) is strongly attenuated while preserving the oboe’s harmonic structure and transient detail.
 
