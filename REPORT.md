@@ -1,4 +1,4 @@
-# Audio-Denoising Project ‑ Technical Report
+# Audio-Denoising Project ‑ Summarized Technical Report
 
 ## &nbsp;&nbsp;Problem Statement
 Single-channel audio denoising with special focus on removing 50 / 60 Hz mains hum and its harmonics.
@@ -37,6 +37,8 @@ A U-Net that predicts a soft mask \([0,1]\) over magnitude spectrograms.
 | **Down**   | 2×2 MaxPool |
 | **Up**     | Bilinear upsample + DoubleConv |
 | **Output** | 1×1 Conv → Sigmoid |
+
+![U-Net architecture](scripts/u-net.jpg)
 
 Why U-Net? Multi-scale context is essential for hum plus harmonics; mask-based estimation preserves noisy phase and is data-efficient.
 
@@ -146,12 +148,5 @@ The figure highlights how harmonic interference (vertical stripes) is strongly a
 4. **Random crops** – ×10 data variety; reduces GPU memory.
 5. **SI-SDR** – correlates with perceived quality; PSNR for cross-paper comparison.
 
----
 
-## &nbsp;&nbsp;Nice Fast Next Step
-* Model pruning / ONNX export for real-time inference (<20 ms latency).
-
-## References
-
-* Oh, J., Kim, D., & Yun, S.-Y. (2018). *Spectrogram-channels U-Net: A source separation model viewing each channel as the spectrogram of each source*. arXiv preprint [arXiv:1810.11520](https://arxiv.org/abs/1810.11520).
 
