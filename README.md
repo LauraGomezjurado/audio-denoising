@@ -91,6 +91,12 @@ python scripts/evaluate_models.py \
 python scripts/plot_results.py results/results.csv
 ```
 
+### 🔊 Listen
+
+| noisy | denoised |
+|-------|----------|
+| <audio controls src="samples/saxophone/saxophone_E3_15_fortissimo_normal_noisy_snr10.0dB.wav"></audio> | <audio controls src="samples/saxophone/denoised_saxophone.wav"></audio> | 
+
 ---
 
 ##  Quickstart
@@ -130,3 +136,4 @@ Then open <http://127.0.0.1:7860> and drag-&-drop a WAV.
 ---
 
 Made with ❤️ & PyTorch 2.7 ✨ 
+
