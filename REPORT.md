@@ -49,7 +49,7 @@ Why U-Net? Multi-scale context is essential for hum plus harmonics; mask-based e
 
 ---
 
-## 5&nbsp;&nbsp;Loss Function
+## &nbsp;&nbsp;Loss Function
 Total loss (see training script):
 
 \[\mathcal{L}=0.7\,\underbrace{\|M\odot|\text{STFT}(x_{n})|-|\text{STFT}(x_{c})|\|_{1}}_{\text{Spectrum L1}}+0.3\,\underbrace{\|\text{ISTFT}(M\odot\text{STFT}(x_{n}))-x_{c}\|_{1}}_{\text{Waveform L1}}\]
@@ -58,7 +58,7 @@ Total loss (see training script):
 
 ---
 
-## 6&nbsp;&nbsp;Optimisation & Hyper-parameters
+## &nbsp;&nbsp;Optimisation & Hyper-parameters
 | Hyper-parameter | Value | Rationale |
 |-----------------|-------|-----------|
 | Optimiser       | AdamW | decoupled weight decay; good generalisation |
