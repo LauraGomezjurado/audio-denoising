@@ -69,7 +69,7 @@ Hyper-parameters (see `train_spectrogram_unet.py`):
 
 ##  Results
 
-[![Training & Validation curves – W&B Report](https://api.wandb.ai/links/lpgomez-stanford-university/fq9yhcso)](https://wandb.ai/lpgomez-stanford-university/audio-denoise-demo/reports/60-Hz-Hum-Removal-with-Spectrogram-U-Net--VmlldzoxMzcyOTQzNQ)
+[![Training & Validation curves – W&B Report](results/figures/wandb_curves.png)](https://wandb.ai/lpgomez-stanford-university/audio-denoise-demo/reports/60-Hz-Hum-Removal-with-Spectrogram-U-Net--VmlldzoxMzcyOTQzNQ)
 
 *Training vs. validation loss and SI-SDR stay closely aligned, indicating the model converges without over-fitting.*
 
