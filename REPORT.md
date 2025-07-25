@@ -53,8 +53,8 @@ Total loss (see training script):
 
 $$
 \begin{aligned}
-\mathcal{L} &= 0.7\,\underbrace{\left\lVert M\odot|\text{STFT}(x_{n})|-|\text{STFT}(x_{c})| \right\rVert_{1}}_{\text{Spectrum L1}} \\
-&\quad+ 0.3\,\underbrace{\left\lVert \text{ISTFT}(M\odot\text{STFT}(x_{n}))-x_{c}\right\rVert_{1}}_{\text{Waveform L1}}
+\mathcal{L} &= 0.7\,\left\|\, M \odot \left| \mathrm{STFT}(x_n) \right| \; - \; \left| \mathrm{STFT}(x_c) \right| \,\right\|_{1} \\
+            &\quad +\; 0.3\,\left\| \mathrm{ISTFT}\bigl(M \odot \mathrm{STFT}(x_n)\bigr) \; - \; x_c \right\|_{1}
 \end{aligned}
 $$
 
