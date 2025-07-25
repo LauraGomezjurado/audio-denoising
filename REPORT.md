@@ -122,6 +122,27 @@ Generates bar charts (SI-SDR & PSNR) in `results/figures/`.
 
 *Insert plots and actual numbers here once training completes.*
 
+### Qualitative Example: Oboe
+
+![Spectrogram comparison – oboe clip](samples/figures/oboe.png)
+
+> **Figure:** Time–frequency representation of the oboe example.  **Left:** noisy recording with 60 Hz hum and harmonics.  **Centre:** output of the proposed denoiser.  **Right:** clean ground-truth.
+
+The algorithm operates entirely in the STFT domain and follows these steps:
+
+1. **Short-Time Fourier Transform** – the noisy waveform is converted to a complex spectrogram using a 1024-point Hann window with 75 % overlap.
+
+2. **Magnitude extraction & normalisation** – I feed the magnitude  |Y| (shape = `(1,1,F,T)`) to the neural network; the phase is kept untouched for later reuse.
+3. **Spectrogram U-Net inference** – the model outputs a soft mask  $\hat M\in[0,1]^{F\times T}$ that estimates, for every TF-bin, the ratio of clean energy to noisy energy.
+
+4. **Mask application** – we compute the denoised spectrogram $\hat{S}=\hat{M}\odot Y$ by element-wise multiplication with the complex noisy STFT.
+
+5. **Inverse STFT** – using the original phase and overlap–add synthesis, we obtain the time-domain waveform.
+
+6. **Peak normalisation** – finally, we scale the signal to avoid clipping.
+
+The figure highlights how harmonic interference (vertical stripes) is strongly attenuated while preserving the oboe’s harmonic structure and transient detail.
+
 ---
 
 ## 10&nbsp;&nbsp;Key Technical Justifications
