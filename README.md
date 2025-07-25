@@ -6,10 +6,6 @@
 
 ##   Project overview
 
-Mains electricity (50/60 Hz) often leaks into microphone recordings, producing an audible
-````text
-˧˧ bzzz…  bzzz…
-````
 This repo trains a **U-Net that predicts a soft mask over magnitude spectrograms** and removes the hum while keeping speech intact.
 
 *   Input: single-channel 16 kHz WAV
