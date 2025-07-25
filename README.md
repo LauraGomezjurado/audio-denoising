@@ -95,7 +95,7 @@ python scripts/plot_results.py results/results.csv
 
 | noisy | denoised |
 |-------|----------|
-| <audio controls src="samples/saxophone/saxophone_E3_15_fortissimo_normal_noisy_snr10.0dB.wav"></audio> | <audio controls src="samples/saxophone/denoised_saxophone.wav"></audio> | 
+| [sax – noisy 🎧](samples/saxophone/saxophone_E3_15_fortissimo_normal_noisy_snr10.0dB.wav) | [sax – denoised 🎧](samples/saxophone/denoised_saxophone.wav) |
 
 ---
 
