@@ -89,7 +89,8 @@ def train_epoch(model, loader, optimizer, scaler, device, max_batches: int | Non
         noisy = noisy.to(device)
         clean = clean.to(device)
         optimizer.zero_grad()
-        with autocast():
+        # Autocast (mixed precision) only on CUDA devices
+        with autocast(enabled=(device.type == "cuda")):
             stft_noi = stft_noisy(noisy)
             mag_noi = torch.abs(stft_noi)
             mask = model(mag_noi.unsqueeze(1)).squeeze(1)
@@ -152,16 +153,36 @@ def main():
     p.add_argument("--wandb", action="store_true", help="Log training to Weights & Biases")
     p.add_argument("--wandb_project", default="audio-denoising", help="wandb project name")
     p.add_argument("--wandb_entity", default=None, help="wandb entity (user or team)")
+    p.add_argument("--resume", type=str, default=None,
+               help="Path to a checkpoint (.pt) to resume from")
     args = p.parse_args()
 
     Path(args.save_dir).mkdir(parents=True, exist_ok=True)
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # Determine the best available device: CUDA (NVIDIA), MPS (Apple Silicon GPUs), or CPU
+    if torch.cuda.is_available():
+        device = torch.device("cuda")
+    elif getattr(torch.backends, "mps", None) is not None and torch.backends.mps.is_available():
+        device = torch.device("mps")
+    else:
+        device = torch.device("cpu")
+
     print(f"Using device: {device}")
+
     model = SpectrogramUNet().to(device)
     optim = torch.optim.AdamW(model.parameters(), lr=args.lr)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optim, T_max=args.epochs)
-    scaler = GradScaler()
+    # Mixed-precision & GradScaler only make sense on CUDA; disable elsewhere
+    scaler = GradScaler(enabled=(device.type == "cuda"))
+
+    start_epoch = 1
+    if args.resume is not None:
+        ckpt = torch.load(args.resume, map_location=device)
+        model.load_state_dict(ckpt["model"])
+        optim.load_state_dict(ckpt["opt"])
+        start_epoch = ckpt["epoch"] + 1          # continue AFTER the saved one
+        scheduler.last_epoch = ckpt["epoch"]     # keep the LR curve in sync
+        print(f"Resumed from {args.resume} (epoch {ckpt['epoch']})")
 
     # initialise wandb if requested and available
     if args.wandb:
@@ -173,7 +194,7 @@ def main():
     train_loader, val_loader = get_dataloaders(args.dataset, args.crop, args.batch, args.workers, subset=args.subset)
 
     best_sdr = -np.inf
-    for epoch in range(1, args.epochs + 1):
+    for epoch in range(start_epoch, args.epochs + 1):
         train_loss = train_epoch(model, train_loader, optim, scaler, device, max_batches=args.max_batches)
         val_loss, val_sdr = validate(model, val_loader, device, max_batches=args.max_batches)
         scheduler.step()
