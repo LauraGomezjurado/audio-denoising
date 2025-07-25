@@ -131,7 +131,37 @@ Then open <http://127.0.0.1:7860> and drag-&-drop a WAV.
 2. All checkpoints, CSVs and figures are version-controlled – see `checkpoints/best.pt`.
 3. Dockerfile coming soon.
 
+## References
 
+* Oh, J., Kim, D., & Yun, S.-Y. (2018). *Spectrogram-channels U-Net: A source separation model viewing each channel as the spectrogram of each source*. arXiv preprint [arXiv:1810.11520](https://arxiv.org/abs/1810.11520).
+
+```bibtex
+@inproceedings{zhang2023birdsoundsdenoising,
+  title={BirdSoundsDenoising: Deep Visual Audio Denoising for Bird Sounds},
+  author={Zhang, Youshan and Li, Jialu},
+  booktitle={Proceedings of the IEEE/CVF Winter Conference on Applications of Computer Vision (WACV)},
+  year={2023},
+  pages={3164--3173},
+  publisher={IEEE}
+}
+
+@inproceedings{babaev2024finally,
+  title={{FINALLY}: Fast and Universal Speech Enhancement with Studio-like Quality},
+  author={Babaev, Nicholas and Tamogashev, Kirill and Saginbaev, Azat and Shchekotov, Ivan and Bae, Hanbin and Sung, Hosang and Lee, WonJun and Cho, Hoon-Young and Andreev, Pavel},
+  booktitle={Advances in Neural Information Processing Systems (NeurIPS)},
+  year={2024},
+  publisher={Curran Associates, Inc.}
+}
+
+@inproceedings{zhang2023complex,
+  title={Complex Image Generation SwinTransformer Network for Audio Denoising},
+  author={Zhang, Youshan and Li, Jialu},
+  booktitle={Proceedings of INTERSPEECH 2023},
+  year={2023},
+  address={Dublin, Ireland},
+  organization={ISCA}
+}
+```
 
 ---
 
