@@ -13,7 +13,9 @@ Single-channel audio denoising with special focus on removing 50 / 60 Hz mains h
 * Recursively scans `--clean-dir` for clean `.wav` files.
 * Loads a long noise recording `--noise-file` and mixes it into each clean clip at a randomly chosen SNR from `[0, 5, 10, 15] dB` (default).
 * Scaling factor (see `mix_audio`):
-  \[\text{scale} = \sqrt{\tfrac{P_{\text{clean}}}{10^{\text{SNR}/10}\,P_{\text{noise}}}}\]
+  $$
+  \text{scale}= \sqrt{\frac{P_{\text{clean}}}{10^{\text{SNR}/10}\,P_{\text{noise}}}}
+  $$
 * Outputs:
   * `dataset/{train,val,test}/{clean|noisy}/*.wav`
   * Metadata CSV `{split}_metadata.csv` containing `noisy_path,clean_path,snr_db`.
@@ -52,7 +54,10 @@ Why U-Net? Multi-scale context is essential for hum plus harmonics; mask-based e
 ## &nbsp;&nbsp;Loss Function
 Total loss (see training script):
 
-\[\mathcal{L}=0.7\,\underbrace{\|M\odot|\text{STFT}(x_{n})|-|\text{STFT}(x_{c})|\|_{1}}_{\text{Spectrum L1}}+0.3\,\underbrace{\|\text{ISTFT}(M\odot\text{STFT}(x_{n}))-x_{c}\|_{1}}_{\text{Waveform L1}}\]
+$$
+\mathcal{L}=0.7\,\underbrace{\lVert M\odot|\text{STFT}(x_{n})|-|\text{STFT}(x_{c})| \rVert_{1}}_{\text{Spectrum L1}} \\
+\quad+0.3\,\underbrace{\lVert \text{ISTFT}(M\odot\text{STFT}(x_{n}))-x_{c}\rVert_{1}}_{\text{Waveform L1}}
+$$
 
 *Emphasis on spectral accuracy while still guiding waveform-level coherence.*
 
