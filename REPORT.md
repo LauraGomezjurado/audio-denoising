@@ -51,12 +51,7 @@ Why U-Net? Multi-scale context is essential for hum plus harmonics; mask-based e
 ## &nbsp;&nbsp;Loss Function
 Total loss (see training script):
 
-$$
-\begin{aligned}
-\mathcal{L} &= 0.7\,\left\|\, M \odot \left| \mathrm{STFT}(x_n) \right| \; - \; \left| \mathrm{STFT}(x_c) \right| \,\right\|_{1} \\
-            &\quad +\; 0.3\,\left\| \mathrm{ISTFT}\bigl(M \odot \mathrm{STFT}(x_n)\bigr) \; - \; x_c \right\|_{1}
-\end{aligned}
-$$
+![Loss function equation](scripts/loss_function.png)
 
 *Emphasis on spectral accuracy while still guiding waveform-level coherence.*
 
